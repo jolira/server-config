@@ -1,0 +1,22 @@
+{
+    "name":"server-config",
+    "version":"0.0.1",
+    "description":"Load Configuration for Servers from Environment Variables or Config Files",
+    "contributors": [
+        "Joachim Kainz <jfk@jolira.com> (http://www.jolira.com)"
+    ],
+    "repository":{
+        "url":"https://github.com/jolira/server-config.git",
+        "type":"git"
+    },
+    "bugs":{
+        "mail":"dev@jolira.com",
+        "url":"http://github.com/jolira/server-config/issues"
+    },
+    "dependencies": {
+    },
+    "main":"index",
+    "engines":{
+        "node":">= 0.6.0 < 0.7.0"
+    }
+}
