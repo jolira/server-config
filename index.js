@@ -8,15 +8,7 @@
         return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
     }
 
-    function merge(result, content) {
-        var keys = Object.keys(content);
-
-        return keys.forEach(function(key){
-            result[key] = content[key];
-        });
-    }
-
-    function loadConfigFile(config, result, cb) {
+    function loadConfigFile(config, cb) {
         var matched = config.match(/(~)?([^#]+)(?:#(\w+))?/);
 
         if (!matched) {
@@ -31,9 +23,9 @@
             file = getHome() + file;
         }
 
-        return fs.readFile('file', "utf-8", function (err, content) {
+        return fs.readFile(file, "utf-8", function (err, content) {
             if (err) {
-                return cb(err);
+                return cb(); // ignore readfile errors
             }
 
             var parsed = JSON.parse(content);
@@ -42,8 +34,22 @@
                 parsed = parsed[qualifier];
             }
 
-            return cb(undefined, merge(result, content));
+            return cb(undefined, parsed);
         });
+    }
+
+    function merge(result, content) {
+        var keys = Object.keys(content);
+
+        keys.forEach(function(key){
+            var value = content[key];
+
+            if (value) {
+                result[key] = value;
+            }
+        });
+
+        return result;
     }
 
     function loadConfigs(args, result, cb) {
@@ -51,25 +57,23 @@
             return cb(undefined, result);
         }
 
-        var config = args.pop();
+        var config = args.shift();
 
         if (Object.prototype.toString.call(config) == '[object String]') {
-            return loadConfigFile(config, result, function(err, result) {
+            return loadConfigFile(config, function(err, content) {
                 if (err) {
                     return cb(err, result);
+                }
+
+                if (content) {
+                    result = merge(result, content);
                 }
 
                 return loadConfigs(args, result, cb);
             });
         }
 
-        var keys = Object.keys(config);
-
-        return keys.forEach(function(key){
-            var variable = config[key];
-
-            result[key] = process.env[variable];
-        });
+        return loadConfigs(args, merge(result, config), cb);
     }
 
     module.exports = function() {

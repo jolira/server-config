@@ -7,24 +7,24 @@ Production.
 
 The configuration approach promoted by this little utility makes it uncesseary to keep an elaborate
 build process supporting these different enviroments. Using this utility, configuration information
-can be stored in three different locations:
+can be stored in embedded defaults that can be overriden using a configuration file and
+environment variables.
 
-* "_embedded_": Defaults can be embedded with the component, such as a ``defaults.json`` file
-  next to the ``package.json`` file. This file should contain all the default settings.
-* "_host specific_": The "_embedded_" defaults can be overriden by host specific configuration
-  settings either defined in a configuration file in the user home-directory or using
-  enviornment variables (like one would do for services such as Heroku).
 
 # Example
 
 ```
 var path = require('path'),
     loadConfig = require('server-config'),
-    embedded = path.join(__dirname, 'defaults.json'),
+    embedded = {
+      "httpPort": 80,
+      "httpsPort": 443,
+      "seaPort": 9090
+    },
     host = '~/.defaults.json#myapp',
     env = {
-        mongdb: MONGODB,
-        seaPort: SEA_PORT
+        mongdb: process.env["MONGODB"],
+        seaPort: process.env["SEA_PORT"]
     };
 
     loadConfig(embedded, host, env, function(err, config) {
@@ -32,21 +32,6 @@ var path = require('path'),
           throw err();
         }
     });
-```
-
-The example will first load JSON from the ``embedded`` file and than the file identified by ``host``.
-From the host file it will extract the ``myapp`` entry and merge it into the data-structure
-previously loaded from ``embedded``. Lastly it will process the ``env`` structure and override
-any matching value in the existing config and merge the onces that do not exist.
-
-Let's assume that this is the content of the ``embedded`` file:
-
-```
-{
-  "httpPort": 80,
-  "httpsPort": 443,
-  "seaPort": 9090
-}
 ```
 
 Let's further assume the ``host`` file contains:
