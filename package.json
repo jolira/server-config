@@ -1,6 +1,6 @@
 {
     "name":"server-config",
-    "version":"0.0.1",
+    "version":"0.0.2",
     "description":"Load Configuration for Servers from Environment Variables or Config Files",
     "contributors": [
         "Joachim Kainz <jfk@jolira.com> (http://www.jolira.com)"
@@ -17,6 +17,6 @@
     },
     "main":"index",
     "engines":{
-        "node":">= 0.6.0 < 0.7.0"
+        "node":">= 0.6.0 < 0.9.0"
     }
 }
