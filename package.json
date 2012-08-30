@@ -1,7 +1,7 @@
 {
     "name":"server-config",
-    "version":"0.0.2",
-    "description":"Load Configuration for Servers from Environment Variables or Config Files",
+    "version":"0.1.0",
+    "description":"Load Configuration for Servers from Environment Variables, Config Files, EC2 Meta Data, etc",
     "contributors": [
         "Joachim Kainz <jfk@jolira.com> (http://www.jolira.com)"
     ],
@@ -14,6 +14,7 @@
         "url":"http://github.com/jolira/server-config/issues"
     },
     "dependencies": {
+        "batch":"*"
     },
     "main":"index",
     "engines":{

@@ -16,6 +16,7 @@ environment variables.
 ```
 var path = require('path'),
     loadConfig = require('server-config'),
+    ec2instance = loadConfig.ec2instance,
     embedded = {
       "httpPort": 80,
       "httpsPort": 443,
@@ -25,9 +26,13 @@ var path = require('path'),
     env = {
         mongdb: process.env["MONGODB"],
         seaPort: process.env["SEA_PORT"]
+    },
+    ec2 = {
+        "public-hostname":ec2instance("meta-data/public-hostname"),
+        "hostname":ec2instance("meta-data/hostname")
     };
 
-    loadConfig(embedded, host, env, function(err, config) {
+    loadConfig(embedded, host, env, ec2, function(err, config) {
         if (err) {
           throw err();
         }

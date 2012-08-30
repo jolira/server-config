@@ -2,7 +2,8 @@
 (function (module) {
     "use strict";
 
-    var fs = require('fs');
+    var fs = require('fs'),
+        http = require('http');
 
     function getHome() {
         return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
@@ -38,18 +39,34 @@
         });
     }
 
-    function merge(result, content) {
-        var keys = Object.keys(content);
+    function merge(result, content, cb) {
+        var batch = new Batch(),
+            keys = Object.keys(content);
 
-        keys.forEach(function(key){
+        keys.forEach(function (key) {
             var value = content[key];
 
             if (value) {
-                result[key] = value;
+                if (value.__isEC2InstanceData__) {
+                    return batch.push(function (done) {
+                        value(function (err, value) {
+                            if (err) {
+                                return done(err);
+                            }
+
+                            result[key] = value;
+                            return done();
+                        });
+                    });
+                }
+
+                return result[key] = value;
             }
         });
 
-        return result;
+        return batch.end(function (err) {
+            return cb(err, result);
+        });
     }
 
     function loadConfigs(args, result, cb) {
@@ -60,13 +77,19 @@
         var config = args.shift();
 
         if (Object.prototype.toString.call(config) == '[object String]') {
-            return loadConfigFile(config, function(err, content) {
+            return loadConfigFile(config, function (err, content) {
                 if (err) {
                     return cb(err, result);
                 }
 
                 if (content) {
-                    result = merge(result, content);
+                    return merge(result, content, function (result) {
+                        if (err) {
+                            return cb(err, result);
+                        }
+
+                        return loadConfigs(args, result, cb);
+                    });
                 }
 
                 return loadConfigs(args, result, cb);
@@ -76,10 +99,37 @@
         return loadConfigs(args, merge(result, config), cb);
     }
 
-    module.exports = function() {
+    module.exports = function () {
         var args = Array.prototype.slice.call(arguments),
             cb = args.pop();
 
         return loadConfigs(args, {}, cb);
+    };
+
+    // http://169.254.169.254/latest/meta-data/instance-id
+    module.exports.ec2instance = function (key) {
+        var value = function (cb) {
+            return http.request({
+                host:'169.254.169.254',
+                port:80,
+                path:'/latest/' + key
+            },function (res) {
+                var data = "";
+
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    data += chunk;
+                });
+                return res.on('end', function () {
+                    return cb(undefined, data);
+                });
+            }).on('error', function (e) {
+                    return cb(e);
+                });
+        };
+
+        value.__isEC2InstanceData__ = true;
+
+        return value;
     };
 })(module);
