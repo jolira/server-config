@@ -3,6 +3,7 @@
     "use strict";
 
     var fs = require('fs'),
+        Batch = require('batch'),
         http = require('http');
 
     function getHome() {
