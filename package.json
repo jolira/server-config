@@ -1,6 +1,6 @@
 {
     "name":"server-config",
-    "version":"0.1.0",
+    "version":"0.1.1",
     "description":"Load Configuration for Servers from Environment Variables, Config Files, EC2 Meta Data, etc",
     "contributors": [
         "Joachim Kainz <jfk@jolira.com> (http://www.jolira.com)"
