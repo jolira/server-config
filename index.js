@@ -63,6 +63,7 @@
 
                 return result[key] = value;
             }
+            return value;
         });
 
         return batch.end(function (err) {
@@ -84,7 +85,7 @@
                 }
 
                 if (content) {
-                    return merge(result, content, function (result) {
+                    return merge(result, content, function (err, result) {
                         if (err) {
                             return cb(err, result);
                         }
@@ -97,7 +98,13 @@
             });
         }
 
-        return loadConfigs(args, merge(result, config), cb);
+        return merge(result, config, function (err, result) {
+            if (err) {
+                return cb(err, result);
+            }
+
+            return loadConfigs(args, result, cb);
+        });
     }
 
     module.exports = function () {
